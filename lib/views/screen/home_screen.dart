@@ -6,9 +6,9 @@ class HomeScreen extends StatefulWidget {
   final ValueChanged<bool> onThemeModeChanged;
 
   const HomeScreen({
-    Key? key,
+    super.key,
     required this.onThemeModeChanged,
-  }) : super(key: key);
+  });
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Pick Color'),
+          title: const Text('Pick Color'),
           content: SingleChildScrollView(
             child: BlockPicker(
               pickerColor: _appBarColor,
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Done'),
+              child: const Text('Done'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
         backgroundColor: _appBarColor,
         centerTitle: true,
         actions: [
@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onThemeModeChanged: widget.onThemeModeChanged,
         onColorChanged: _onColorChanged,
       ),
-      body: Center(
+      body: const Center(
         child: Text('Home Screen Content'),
       ),
     );

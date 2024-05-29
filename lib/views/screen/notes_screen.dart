@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:perfect_settings_ui/views/widgets/notes_class.dart';
 
 void main() {
-  runApp(NoteApp());
+  runApp(const NoteApp());
 }
 
 class NoteApp extends StatelessWidget {
+  const NoteApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,13 +15,16 @@ class NoteApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: NoteScreen(),
+      home: const NoteScreen(),
     );
   }
 }
 
 class NoteScreen extends StatefulWidget {
+  const NoteScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _NoteScreenState createState() => _NoteScreenState();
 }
 
@@ -52,7 +57,7 @@ class _NoteScreenState extends State<NoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
+        title: const Text('Notes'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,7 +69,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 children: <Widget>[
                   TextFormField(
                     controller: _titleController,
-                    decoration: InputDecoration(labelText: 'Title'),
+                    decoration: const InputDecoration(labelText: 'Title'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a title';
@@ -74,7 +79,7 @@ class _NoteScreenState extends State<NoteScreen> {
                   ),
                   TextFormField(
                     controller: _contentController,
-                    decoration: InputDecoration(labelText: 'Content'),
+                    decoration: const InputDecoration(labelText: 'Content'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter content';
@@ -82,10 +87,10 @@ class _NoteScreenState extends State<NoteScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _addNote,
-                    child: Text('Add Note'),
+                    child: const Text('Add Note'),
                   ),
                 ],
               ),
@@ -100,7 +105,7 @@ class _NoteScreenState extends State<NoteScreen> {
                     subtitle: Text(note.content),
                     trailing: Text(
                       note.createdDate.toLocal().toString(),
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   );
                 },
