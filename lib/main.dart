@@ -24,19 +24,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: _locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('ru', ''),
-        Locale('uz', ''),
-      ],
       home: HomeScreen(
         onThemeModeChanged: (_) {},
-        onLocaleChanged: _setLocale,
       ),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

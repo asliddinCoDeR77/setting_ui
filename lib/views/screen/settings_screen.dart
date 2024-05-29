@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:perfect_settings_ui/utils/app_thememode.dart';
-import 'package:perfect_settings_ui/views/screen/home_screen.dart';
-import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart';
+import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart'; // Ensure this import path is correct
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ValueChanged<bool> onThemeModeChanged;
@@ -24,71 +23,42 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   Color _currentColor = Colors.blue;
   bool _isPinEnabled = false;
-  bool _isFingerprintEnabled = false;
+  String? _pinCode;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _checkPin();
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _currentColor = Color(prefs.getInt('app_color') ?? Colors.blue.value);
-      _isPinEnabled = prefs.getBool('is_pin_enabled') ?? false;
-      _isFingerprintEnabled = prefs.getBool('is_fingerprint_enabled') ?? false;
+      _isPinEnabled = prefs.getBool('pin_enabled') ?? false;
+      _pinCode = prefs.getString('pin_code');
     });
   }
 
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('app_color', _currentColor.value);
-    await prefs.setBool('is_pin_enabled', _isPinEnabled);
-    await prefs.setBool('is_fingerprint_enabled', _isFingerprintEnabled);
+    await prefs.setBool('pin_enabled', _isPinEnabled);
+    if (_pinCode != null) {
+      await prefs.setString('pin_code', _pinCode!);
+    }
   }
 
-  Future<void> _setPin() async {
-    final TextEditingController pinController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Set PIN'),
-          content: TextField(
-            controller: pinController,
-            keyboardType: TextInputType.number,
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Enter PIN',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('user_pin', pinController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _reopenApp() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+  void _checkPin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isPinEnabled = prefs.getBool('pin_enabled') ?? false;
+    if (isPinEnabled) {
+      final pinCode = prefs.getString('pin_code');
+      if (pinCode != null) {
+        _showPinCodeDialog(isSetup: false);
+      }
+    }
   }
 
   @override
@@ -129,35 +99,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: _currentColor,
               ),
               onTap: _showColorPickerDialog,
+              
             ),
             SwitchListTile(
               value: _isPinEnabled,
-              onChanged: (value) async {
+              onChanged: (value) {
                 setState(() {
                   _isPinEnabled = value;
                 });
                 if (value) {
-                  await _setPin();
+                  _showPinCodeDialog(isSetup: true);
+                } else {
+                  _pinCode = null;
+                  _saveSettings();
                 }
-                await _saveSettings();
               },
               title: const Text("ENABLE PIN CODE"),
             ),
-            SwitchListTile(
-              value: _isFingerprintEnabled,
-              onChanged: (value) async {
-                setState(() {
-                  _isFingerprintEnabled = value;
-                });
-                await _saveSettings();
-              },
-              title: const Text("ENABLE FINGERPRINT"),
-            ),
-            if (_isPinEnabled && _isFingerprintEnabled)
-              ElevatedButton(
-                onPressed: _reopenApp,
-                child: const Text('Re-open App'),
-              ),
           ],
         ),
       ),
@@ -194,79 +152,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
   }
-}
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final TextEditingController pinController = TextEditingController();
-    final LocalAuthentication auth = LocalAuthentication();
-
-    Future<bool> _authenticate() async {
-      final isAvailable = await auth.canCheckBiometrics;
-      if (!isAvailable) {
-        return false;
-      }
-      try {
-        return await auth.authenticate(
-          localizedReason: 'Please authenticate to access the app',
-          options: const AuthenticationOptions(
-            biometricOnly: true,
-          ),
-        );
-      } catch (e) {
-        return false;
-      }
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Please enter your PIN and use fingerprint to login'),
-            TextField(
-              controller: pinController,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Enter PIN',
-              ),
+  void _showPinCodeDialog({required bool isSetup}) {
+    TextEditingController pinController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(isSetup ? 'Set up your PIN' : 'Enter your PIN'),
+          content: PinCodeTextField(
+            length: 4,
+            obscureText: true,
+            animationType: AnimationType.fade,
+            pinTheme: PinTheme(
+              shape: PinCodeFieldShape.box,
+              borderRadius: BorderRadius.circular(5),
+              fieldHeight: 50,
+              fieldWidth: 40,
+              activeFillColor: Colors.white,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
+            animationDuration: const Duration(milliseconds: 300),
+            backgroundColor: Colors.blue.shade50,
+            enableActiveFill: true,
+            controller: pinController,
+            onCompleted: (v) async {
+              if (isSetup) {
+                setState(() {
+                  _pinCode = v;
+                });
+                await _saveSettings();
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PIN code set successfully')),
+                );
+              } else {
                 final prefs = await SharedPreferences.getInstance();
-                final savedPin = prefs.getString('user_pin');
-                final isAuthenticated = await _authenticate();
-                if (pinController.text == savedPin && isAuthenticated) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(
-                        onThemeModeChanged: (bool value) {},
-                        onLocaleChanged: (Locale value) {},
-                      ),
-                    ),
-                  );
+                final storedPin = prefs.getString('pin_code');
+                if (storedPin == v) {
+                  Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Invalid PIN or authentication failed')),
+                    const SnackBar(content: Text('Incorrect PIN code')),
                   );
                 }
-              },
-              child: const Text('Login'),
-            ),
-          ],
-        ),
-      ),
+              }
+            },
+            appContext: context,
+            onChanged: (value) {},
+          ),
+        );
+      },
     );
   }
 }
