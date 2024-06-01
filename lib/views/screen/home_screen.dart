@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart'; // Ensure this import path is correct
+import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueChanged<bool> onThemeModeChanged;
@@ -17,6 +18,25 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Color _appBarColor = Colors.blue;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadAppBarColor();
+  }
+
+  void _loadAppBarColor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final colorCode = prefs.getInt('appBarColor') ?? Colors.blue.value;
+    setState(() {
+      _appBarColor = Color(colorCode);
+    });
+  }
+
+  void _saveAppBarColor(Color color) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('appBarColor', color.value);
+  }
+
   void _showColorPickerDialog() {
     showDialog(
       context: context,
@@ -30,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {
                   _appBarColor = color;
                 });
+                _saveAppBarColor(color);
               },
             ),
           ),
@@ -50,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _appBarColor = color;
     });
+    _saveAppBarColor(color);
   }
 
   @override

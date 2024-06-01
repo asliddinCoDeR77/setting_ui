@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:perfect_settings_ui/utils/app_thememode.dart';
-import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart'; // Ensure this import path is correct
+import 'package:perfect_settings_ui/views/widgets/customized_drawer.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -99,7 +99,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: _currentColor,
               ),
               onTap: _showColorPickerDialog,
-              
             ),
             SwitchListTile(
               value: _isPinEnabled,
