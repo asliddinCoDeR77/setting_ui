@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:perfect_settings_ui/views/screen/home_screen.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 }
 
