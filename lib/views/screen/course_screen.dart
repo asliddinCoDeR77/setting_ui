@@ -31,7 +31,7 @@ class _CourseListScreenState extends State<CourseListScreen> {
       ),
       body: FutureProvider<List<Course>?>(
         create: (context) => apiService.fetchCourses(),
-        initialData: null, // Use null for initial data
+        initialData: null,
         child: Consumer<List<Course>?>(
           builder: (context, courses, _) {
             if (courses == null) {
