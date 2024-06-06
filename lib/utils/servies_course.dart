@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:perfect_settings_ui/models/course_model.dart';
 
 class ApiService {
-  final String apiUrl = '';
+  final String apiUrl =
+      'https://lesson50-efebe-default-rtdb.asia-southeast1.firebasedatabase.app/courses.json';
 
   Future<List<Course>> fetchCourses() async {
     final response = await http.get(Uri.parse(apiUrl));

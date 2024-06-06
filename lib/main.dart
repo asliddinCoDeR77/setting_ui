@@ -14,10 +14,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomeScreen(
-        onThemeModeChanged: (_) {},
-      ),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/home': (context) => HomeScreen(
+              onThemeModeChanged: (_) {},
+            ),
+      },
     );
   }
 }
